@@ -5,8 +5,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
 
 
-## shorten this function
-def create_df_from_API(api_results):
+def create_df_current_songs(api_results):
     """reads in the spotipy query results and returns a DataFrame"""
     track_name = []
     track_id = []
@@ -14,7 +13,7 @@ def create_df_from_API(api_results):
     album = []
     duration = []
     popularity = []
-    for i, items in enumerate(api_results['items']): #check if enumerate is necessary!!
+    for items in api_results['items']:
             track_name.append(items['name'])
             track_id.append(items['id'])
             artist.append(items["artists"][0]["name"])
@@ -31,6 +30,36 @@ def create_df_from_API(api_results):
                                 "popularity": popularity})
 
     return df
+
+def create_df_saved_songs(api_results):
+    track_name = []
+    track_id = []
+    artist = []
+    album = []
+    duration = []
+    popularity = []
+    for items in api_results["items"]:
+        try:
+            track_name.append(items["track"]['name'])
+            track_id.append(items["track"]['id'])
+            artist.append(items["track"]["artists"][0]["name"])
+            duration.append(items["track"]["duration_ms"])
+            album.append(items["track"]["album"]["name"])
+            popularity.append(items["track"]["popularity"])
+        except TypeError: 
+            pass
+
+    # Create the final df   
+    df = pd.DataFrame({ "track_name": track_name, 
+                             "album": album, 
+                             "track_id": track_id,
+                             "artist": artist, 
+                             "duration": duration, 
+                             "popularity": popularity})
+    return df
+
+
+
 
 def top_artists_from_API(api_results):
     df = pd.DataFrame(api_results["items"])
