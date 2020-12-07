@@ -4,6 +4,8 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
 
+
+## shorten this function
 def create_df_from_API(api_results):
     """reads in the spotipy query results and returns a DataFrame"""
     track_name = []
@@ -31,31 +33,10 @@ def create_df_from_API(api_results):
     return df
 
 def top_artists_from_API(api_results):
-    name = []
-    artist_id = []
-    genres = []
-    uri = []
-    popularity = []
-    #more features are available but I didn't deem them impotant
-    for artist in api_results["items"]:
-        #add name
-        name.append(artist["name"])
-        #add artist_id
-        artist_id.append(artist["id"])
-        #add genres
-        genres.append(artist["genres"])
-        #add popularity
-        popularity.append(artist["popularity"])
-        #add uri
-        uri.append(artist["uri"])
+    df = pd.DataFrame(api_results["items"])
+    cols = ["name","id","genres","popularity","uri"]
+    return df[cols]
     
-    artists_df = pd.DataFrame({ "name": name, 
-                                "artist_id": artist_id, 
-                                "genres": genres,
-                                "uri": uri, 
-                                "popularity": popularity})
-    return artists_df
-
 
 
 def append_audio_features(df,spotify_cred_manager, return_feat_df = False):
