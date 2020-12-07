@@ -12,7 +12,7 @@ def create_df_from_API(api_results):
     album = []
     duration = []
     popularity = []
-    for i, items in enumerate(api_results['items']):
+    for i, items in enumerate(api_results['items']): #check if enumerate is necessary!!
             track_name.append(items['name'])
             track_id.append(items['id'])
             artist.append(items["artists"][0]["name"])
@@ -29,6 +29,32 @@ def create_df_from_API(api_results):
                                 "popularity": popularity})
 
     return df
+
+def top_artists_from_API(api_results):
+    name = []
+    artist_id = []
+    genres = []
+    uri = []
+    popularity = []
+    #more features are available but I didn't deem them impotant
+    for artist in api_results["items"]:
+        #add name
+        name.append(artist["name"])
+        #add artist_id
+        artist_id.append(artist["id"])
+        #add genres
+        genres.append(artist["genres"])
+        #add popularity
+        popularity.append(artist["popularity"])
+        #add uri
+        uri.append(artist["uri"])
+    
+    artists_df = pd.DataFrame({ "name": name, 
+                                "artist_id": artist_id, 
+                                "genres": genres,
+                                "uri": uri, 
+                                "popularity": popularity})
+    return artists_df
 
 
 
@@ -66,7 +92,7 @@ def create_similarity_score(df,similarity_score = "linear"):
         return cosine_sim
     ##implement other measures
 
-def get_recommendations(df,song_title, similarity_score = linear_sim):
+def get_recommendations(df,song_title, similarity_score):
     idx = indices[song_title]
     sim_scores = list(enumerate(similarity_score[idx]))
     sim_scores = sorted(sim_scores, key = lambda x: x[1],reverse = True)
