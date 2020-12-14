@@ -3,6 +3,18 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+import spotipy.util as util
+
+def authenticate(redirect_uri, client_cred_manager, username, scope,client_id,client_secret):
+    sp = spotipy.Spotify(client_credentials_manager = client_cred_manager)
+    token = util.prompt_for_user_token(username, scope, client_id, client_secret, redirect_uri)
+    if token:
+        sp = spotipy.Spotify(auth=token)
+    else:
+        print("Can't get token for", username)
+    return sp
 
 
 def create_df_top_songs(api_results):
@@ -67,7 +79,31 @@ def top_artists_from_API(api_results):
     cols = ["name","id","genres","popularity","uri"]
     return df[cols]
     
+def create_df_recommendations(api_results):
+    track_name = []
+    track_id = []
+    artist = []
+    album = []
+    duration = []
+    popularity = []
+    for items in api_results['tracks']:
+        try:
+            track_name.append(items['name'])
+            track_id.append(items['id'])
+            artist.append(items["artists"][0]["name"])
+            duration.append(items["duration_ms"])
+            album.append(items["album"]["name"])
+            popularity.append(items["popularity"])
+        except TypeError:
+            pass
+        df = pd.DataFrame({ "track_name": track_name, 
+                                "album": album, 
+                                "track_id": track_id,
+                                "artist": artist, 
+                                "duration": duration, 
+                                "popularity": popularity})
 
+    return df
 
 def append_audio_features(df,spotify_cred_manager, return_feat_df = False):
     """ Fetches the audio features for all songs in a DataFrame and
