@@ -212,7 +212,32 @@ def append_audio_features(df,spotify_auth, return_feat_df = False):
     else:
         return df,df_features
 
+def dataframe_difference(df1, df2, which=None):
+    """ 
+    Finds rows which are different between two DataFrames.
 
+    Parameters
+    ----------
+    df1 : Dataframe
+    df2 : Dataframe
+    which : which rows to keep
+
+    Returns
+    -------
+    diff_df: DataFrame containing the differences in rows
+
+    """
+    comparison_df = df1.merge(
+        df2,
+        indicator=True,
+        how='outer'
+    )
+    if which is None:
+        diff_df = comparison_df[comparison_df['_merge'] != 'both']
+    else:
+        diff_df = comparison_df[comparison_df['_merge'] == which]
+    diff_df.drop("_merge",axis = 1, inplace = True)
+    return diff_df.drop_duplicates().reset_index(drop = True)
 
 def create_similarity_score(df1,df2,similarity_score = "cosine_sim"):
     """ 
