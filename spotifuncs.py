@@ -178,6 +178,29 @@ def create_df_recommendations(api_results):
 
     return df
 
+def create_df_playlist(api_results,sp = None, append_audio = True):
+    """
+    Reads in the spotipy query results for a playlist and returns a 
+    DataFrame with track_name,track_id,artist,album,duration,popularity
+    and audio_features unless specified otherwise.
+
+    Parameters
+    ----------
+    api_results : the results of a query to spotify with .recommendations()
+    sp : spotfiy authentication token (result of authenticate())
+    append_audio : argument to choose whether to append audio features
+
+    Returns
+    -------
+    df: DataFrame containing track_name, track_id, artist, album, duration, popularity
+
+    """
+    df = create_df_saved_songs(api_results["tracks"])
+    if append_audio == True:
+        assert sp != None, "sp needs to be specified for appending audio features"
+        df = append_audio_features(df,sp)
+    return df
+
 def append_audio_features(df,spotify_auth, return_feat_df = False):
     """ 
     Fetches the audio features for all songs in a DataFrame and
@@ -187,8 +210,9 @@ def append_audio_features(df,spotify_auth, return_feat_df = False):
     Parameters
     ----------
     df : Dataframe containing at least track_name and track_id for spotify songs
-
-
+    spotify_auth: spotfiy authentication token (result of authenticate())
+    return_feat_df: argument to choose whether to also return df with just the audio features
+    
     Returns
     -------
     df: DataFrame containing all original rows and audio features for each song
