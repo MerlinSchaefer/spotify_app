@@ -297,6 +297,35 @@ def create_similarity_score(df1,df2,similarity_score = "cosine_sim"):
         return cosine_sim
     #other measures may be implemented in the future
 
+def filter_with_meansong(mean_song,recommendations_df, n_recommendations = 10):
+    """ 
+    Creates a dataframe of final recommendations filtered with a "mean" song from a playlist.
+
+    Parameters
+    ----------
+    mean_song : DataFrame containing mean values of the original playlist dataframe to represent "mean" song
+    recommendations_df : DataFrame containing songs as recommended by spotify including their audio features
+    n_recommendations : number of final recommended songs
+    
+    similarity_score: similarity measure (linear,cosine_sim)
+
+    Returns
+    -------
+    df: DataFrame containing all original rows and audio features for each song
+
+    df_features(optional): DataFrame containing just the audio features
+    """
+
+    mean_song_feat = mean_song[list(mean_song.columns[6:])].values
+    mean_song_scaled = StandardScaler().fit_transform(mean_song_feat.reshape(-1,1))
+    recommendations_df_scaled = StandardScaler().fit_transform(recommendations_df[list(mean_song.columns[6:])])
+    mean_song_scaled = mean_song_scaled.reshape(1,-1)
+    sim_mean_finrecomms = cosine_similarity(mean_song_scaled,recommendations_df_scaled)[0][:]
+    #sim_mean_finrecomms = sim_mean_finrecomms[0][:]
+    indices = (-sim_mean_finrecomms).argsort()[:n_recommendations]
+    final_recommendations = recommendations_df.iloc[indices]
+    return final_recommendations
+
 ###still a work in progress
 def get_recommendations(df,song_title, similarity_score, num_recommends = 5):
     """ 

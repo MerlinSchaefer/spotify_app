@@ -39,7 +39,7 @@ sp_m = authenticate(redirect_uri, client_credentials_manager, username1, scope, 
 
 #get playlist based on uri input
 
-playlist_uri = input("Please past the URI of the playlist you wish to add songs to")
+playlist_uri = input("Please past the URI of the playlist you wish to add songs to   ")
 playlist = sp_m.playlist(playlist_uri)
 playlist_df = create_df_playlist(playlist,sp = sp_m)
 
@@ -62,3 +62,13 @@ similarity_score = create_similarity_score(playlist_df,recomms_df)
 final_recomms = recomms_df.iloc[[np.argmax(i) for i in similarity_score]]
 final_recomms = final_recomms.drop_duplicates()
 #filter those with mean song
+n_recommendations = int(input("how many songs would you like to add to your playlist? Please enter a number between 1 - 20"))
+assert 21 > n_recommendations > 0 , "Number of Recommendations must be between 1 and 20   "
+final_recomms = filter_with_meansong(mean_song,final_recomms, n_recommendations=n_recommendations)
+
+# add songs
+confirm = input("Please confirm that you want to add songs to the playlist by typing YES   ")
+if confirm == "YES":
+    sp_m.user_playlist_add_tracks(username1,
+                              playlist_id = playlist_uri,
+                              tracks = final_recomms["track_id"].tolist())
