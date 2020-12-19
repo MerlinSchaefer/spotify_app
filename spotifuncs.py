@@ -278,9 +278,7 @@ def create_similarity_score(df1,df2,similarity_score = "cosine_sim"):
 
     Returns
     -------
-    df: DataFrame containing all original rows and audio features for each song
-
-    df_features(optional): DataFrame containing just the audio features
+    A matrix of similarity scores for the audio features of both DataFrames.
     """
     
     assert list(df1.columns[6:]) == list(df2.columns[6:])
