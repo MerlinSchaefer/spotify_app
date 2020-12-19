@@ -5,7 +5,7 @@ import spotipy.util as util
 from pathlib import Path
 import pandas as pd
 import numpy as np
-from spotifuncs import *
+from spotifuncs import authenticate, create_df_playlist, create_df_recommendations,append_audio_features
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import StandardScaler
 
@@ -39,7 +39,7 @@ sp_m = authenticate(redirect_uri, client_credentials_manager, username1, scope, 
 
 #get playlist based on uri input
 
-playlist_uri = input("Please past the URI of the playlist you wish to add songs to   ")
+playlist_uri = input("Please paste in the URI of the playlist you wish to add songs to   ")
 playlist = sp_m.playlist(playlist_uri)
 playlist_df = create_df_playlist(playlist,sp = sp_m)
 
@@ -56,14 +56,18 @@ for i in range(5,len(seed_tracks)+1,5):
     recomms_df = append_audio_features(create_df_recommendations(recomms),sp_m)
     recomm_dfs.append(recomms_df)
 recomms_df = pd.concat(recomm_dfs)
+recomms_df.reset_index(drop = True, inplace = True)
 #create similarity scoring between playlist and recommendations
 similarity_score = create_similarity_score(playlist_df,recomms_df)
 #get a filtered recommendations df
 final_recomms = recomms_df.iloc[[np.argmax(i) for i in similarity_score]]
 final_recomms = final_recomms.drop_duplicates()
+#filter again so tracks are not already in playlist_df
+final_recomms = final_recomms[~final_recomms["track_name"].isin(playlist_df["track_name"])]
+final_recomms.reset_index(drop = True, inplace = True)
 #filter those with mean song
-n_recommendations = int(input("how many songs would you like to add to your playlist? Please enter a number between 1 - 20"))
-assert 21 > n_recommendations > 0 , "Number of Recommendations must be between 1 and 20   "
+n_recommendations = int(input("how many songs would you like to add to your playlist? Please enter a number between 1 - 20   "))
+assert 21 > n_recommendations > 0 , "Number of Recommendations must be between 1 and 20"
 final_recomms = filter_with_meansong(mean_song,final_recomms, n_recommendations=n_recommendations)
 
 # add songs
