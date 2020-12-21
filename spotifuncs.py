@@ -244,7 +244,7 @@ def dataframe_difference(df1, df2, which=None):
     ----------
     df1 : Dataframe
     df2 : Dataframe
-    which : which rows to keep
+    which : which rows to keep ("both","left","right",None)
 
     Returns
     -------

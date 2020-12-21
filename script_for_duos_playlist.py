@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from spotifuncs import *
 from collections import Counter
-from datetime import date
+
 
 ##define function to get required dfs, subject to change, not part of the spotifuncs
 def get_dfs(sp):
@@ -44,9 +44,6 @@ def get_dfs(sp):
     return top_tracks_df,artists_df,saved_tracks_df
 
 
-#get todays date
-today = date.today()
-today = today.strftime("%d/%m/%Y")
 
 #set path
 path = Path("C:/Users/ms101/OneDrive/DataScience_ML/projects/spotify_app")
@@ -82,18 +79,18 @@ top_tracks_t, artists_t, saved_tracks_t = get_dfs(sp_t)
 
 #find common artists
 common_artists = dataframe_difference(artists_m,artists_t, which = "both")
-common_artists.to_csv(path / (today + "common_artists.csv") #save for checking
+common_artists.to_csv(path / "common_artists.csv") #save for checking
 
 #initiate new playlist dataframe with common top songs
-new_playlist_df = dataframe_difference(top_tracks_m,top_tracks_t,which = "both")
+new_playlist_df = dataframe_difference(top_tracks_m,top_tracks_t, which = "both")
 
 ###possibly add common saved tracks later
 
 #filter top tracks with common artists for both users
 filtered_top_m = top_tracks_m[top_tracks_m["artist"].isin(common_artists["name"])]
-filtered_top_m.to_csv(path / (today + "filtered_top_m.csv")) #save for checking
+filtered_top_m.to_csv(path / "filtered_top_m.csv") #save for checking
 filtered_top_t = top_tracks_t[top_tracks_t["artist"].isin(common_artists["name"])]
-filtered_top_t.to_csv(path / (today + "filtered_top_t.csv")) #save for checking
+filtered_top_t.to_csv(path / "filtered_top_t.csv") #save for checking
 
 #to not have 2+ songs by the same artist we will sample from the above dataframes
 #I will assign weights to the rows depending on how often an artist occurs
@@ -141,10 +138,13 @@ final_recomms = final_recomms.drop_duplicates()
 new_playlist_df = new_playlist_df.append(final_recomms)
 new_playlist_df = new_playlist_df.drop_duplicates()
 new_playlist_df.reset_index(drop = True, inplace = True)
-new_playlist_df.to_csv(path / (today + "Playlist.csv"))
+new_playlist_df.to_csv(path / "Playlist.csv")
 
+#view tracks and artists to check if everything worked
+print("These are the songs for your new DUO.py playlist")
+print(*zip(new_playlist_df["track_name"],new_playlist_df["artist"]))
 #add tracks to playlist
-confirm = input("Please confirm that you want to replace the current playlist by typing YES")
+confirm = input("Please confirm that you want to replace the current playlist by typing YES   ")
 if confirm == "YES":
     sp_m.playlist_replace_items(playlist_id="spotify:playlist:1Vcqtv3nE7QOJ4KFvK7bT8",
-                              tracks = new_playlist_df["track_id"].tolist())
+                              items = new_playlist_df["track_id"].tolist())

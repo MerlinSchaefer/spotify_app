@@ -65,6 +65,7 @@ final_recomms = final_recomms.drop_duplicates()
 #filter again so tracks are not already in playlist_df
 final_recomms = final_recomms[~final_recomms["track_name"].isin(playlist_df["track_name"])]
 final_recomms.reset_index(drop = True, inplace = True)
+
 #filter those with mean song
 n_recommendations = int(input("how many songs would you like to add to your playlist? Please enter a number between 1 - 20   "))
 assert 21 > n_recommendations > 0 , "Number of Recommendations must be between 1 and 20"
