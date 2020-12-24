@@ -324,7 +324,7 @@ def filter_with_meansong(mean_song,recommendations_df, n_recommendations = 10):
     final_recommendations = recommendations_df.iloc[indices]
     return final_recommendations
 
-###still a work in progress
+#####still a work in progress
 def get_recommendations(df,song_title, similarity_score, num_recommends = 5):
     """ 
     Gives top num_recommends recommendations for a song based on a similarity_score or matrix
@@ -350,4 +350,4 @@ def get_recommendations(df,song_title, similarity_score, num_recommends = 5):
     top_scores = sim_scores[1:num_recommends+1]
     song_indices = [i[0] for i in top_scores]
     return df["track_name"].iloc[song_indices]
-###still a work in progress
+#####still a work in progress
