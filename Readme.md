@@ -17,4 +17,4 @@ The spotify recommendations below each playlist are a nice feature, but dependin
 I therefore took the liberty to try to define them. The PlaylistBuddy will add 1-20 new songs to your playlist, based on spotifies recommendations and their similarity to the
 existing songs in a given playlist.
 
-**So far the scripts only work with two accounts. I will provide scripts that you can change according to your needs or even build small apps that can be used without much coding knowledge**
+**So far the scripts only work with three accounts. I will provide scripts that you can change according to your needs or even build small apps that can be used without much coding knowledge**
