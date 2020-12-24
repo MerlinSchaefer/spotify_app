@@ -5,7 +5,7 @@ import spotipy.util as util
 from pathlib import Path
 import pandas as pd
 import numpy as np
-from spotifuncs import authenticate, create_df_playlist, create_df_recommendations,append_audio_features
+from spotifuncs import authenticate, create_df_playlist, create_df_recommendations,append_audio_features, create_similarity_score, filter_with_meansong
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import StandardScaler
 
