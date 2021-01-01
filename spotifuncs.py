@@ -1,7 +1,7 @@
 ##imports
 
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -265,7 +265,7 @@ def dataframe_difference(df1, df2, which=None):
 
 def create_similarity_score(df1,df2,similarity_score = "cosine_sim"):
     """ 
-    Creates a similarity matrix for the audio features of two Dataframes.
+    Creates a similarity matrix for the audio features (except key and mode) of two Dataframes.
 
     Parameters
     ----------
@@ -281,12 +281,13 @@ def create_similarity_score(df1,df2,similarity_score = "cosine_sim"):
     A matrix of similarity scores for the audio features of both DataFrames.
     """
     
-    assert list(df1.columns[6:]) == list(df2.columns[6:])
+    assert list(df1.columns[6:]) == list(df2.columns[6:]), "dataframes need to contain the same columns"
     features = list(df1.columns[6:])
+    features.remove('key')
+    features.remove('mode')
     df_features1,df_features2 = df1[features],df2[features]
-    scaler = StandardScaler()
+    scaler = MinMaxScaler() #StandardScaler() not used anymore
     df_features_scaled1,df_features_scaled2 = scaler.fit_transform(df_features1),scaler.fit_transform(df_features2)
-    #indices = pd.Series(df.index, index = df['track_name']).drop_duplicates()
     if similarity_score == "linear":
         linear_sim = linear_kernel(df_features_scaled1, df_features_scaled2)
         return linear_sim
@@ -314,12 +315,14 @@ def filter_with_meansong(mean_song,recommendations_df, n_recommendations = 10):
     df_features(optional): DataFrame containing just the audio features
     """
 
-    mean_song_feat = mean_song[list(mean_song.columns[6:])].values
-    mean_song_scaled = StandardScaler().fit_transform(mean_song_feat.reshape(-1,1))
-    recommendations_df_scaled = StandardScaler().fit_transform(recommendations_df[list(mean_song.columns[6:])])
+    features = list(mean_song.columns[6:])
+    features.remove("key")
+    features.remove("mode")
+    mean_song_feat = mean_song[features].values
+    mean_song_scaled = MinMaxScaler().fit_transform(mean_song_feat.reshape(-1,1))
+    recommendations_df_scaled = MinMaxScaler().fit_transform(recommendations_df[features])
     mean_song_scaled = mean_song_scaled.reshape(1,-1)
     sim_mean_finrecomms = cosine_similarity(mean_song_scaled,recommendations_df_scaled)[0][:]
-    #sim_mean_finrecomms = sim_mean_finrecomms[0][:]
     indices = (-sim_mean_finrecomms).argsort()[:n_recommendations]
     final_recommendations = recommendations_df.iloc[indices]
     return final_recommendations

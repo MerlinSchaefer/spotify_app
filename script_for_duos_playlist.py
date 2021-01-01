@@ -77,6 +77,9 @@ sp_t = authenticate(redirect_uri, client_credentials_manager, username2, scope, 
 top_tracks_m, artists_m, saved_tracks_m = get_dfs(sp_m)
 top_tracks_t, artists_t, saved_tracks_t = get_dfs(sp_t)
 
+#load last weeks playlist
+last_week_duo = pd.read_csv(path/"Playlist.csv", index_col = 0)
+
 #find common artists
 common_artists = dataframe_difference(artists_m,artists_t, which = "both")
 common_artists.to_csv(path / "common_artists.csv") #save for checking
