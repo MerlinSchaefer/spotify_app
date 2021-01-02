@@ -8,7 +8,8 @@ import pandas as pd
 import numpy as np
 from spotifuncs import *
 from collections import Counter
-
+from operator import itemgetter
+from heapq import nlargest
 
 ##define function to get required dfs, subject to change, not part of the spotifuncs
 def get_dfs(sp):
@@ -22,6 +23,8 @@ def get_dfs(sp):
     top_tracks_short_df = append_audio_features(create_df_top_songs(top_tracks_short),sp)
     top_tracks_med_df = append_audio_features(create_df_top_songs(top_tracks_med),sp)
     top_tracks_long_df = append_audio_features(create_df_top_songs(top_tracks_long),sp)
+    #sample from long-term top tracks to introduce more randomness and avoid having the same artists
+    top_tracks_long_df = top_tracks_long_df.sample(n = 15)
     top_tracks_df = pd.concat([top_tracks_short_df,top_tracks_med_df,top_tracks_long_df]).drop_duplicates().reset_index(drop = True)
         
     #user top artists
@@ -84,15 +87,32 @@ last_week_duo = pd.read_csv(path/"Playlist.csv", index_col = 0)
 common_artists = dataframe_difference(artists_m,artists_t, which = "both")
 common_artists.to_csv(path / "common_artists.csv") #save for checking
 
-#initiate new playlist dataframe with common top songs
-new_playlist_df = dataframe_difference(top_tracks_m,top_tracks_t, which = "both")
+#initiate new playlist dataframe with common top songs that were not in last weeks playlist
+common_songs = dataframe_difference(top_tracks_m,top_tracks_t,which = "both")
+new_playlist_df = common_songs[~common_songs["track_id"].isin(last_week_duo["track_id"])]
 
-###possibly add common saved tracks later
-
+#Create a similarity matrix for top songs of both users, delete songs that both dataframes contain first.
+unique_top_tracks_m = top_tracks_m[~top_tracks_m["track_id"].isin(common_songs["track_id"])]
+unique_top_tracks_m.reset_index(drop = True,inplace = True)
+unique_top_tracks_t = top_tracks_t[~top_tracks_t["track_id"].isin(common_songs["track_id"])]
+unique_top_tracks_t.reset_index(drop = True,inplace = True)
+similarity_top_songs = create_similarity_score(unique_top_tracks_m,unique_top_tracks_t)
+max_n_scores = [(i,np.argmax(x),x[np.argmax(x)]) for i,x in enumerate(similarity_top_songs)]
+idx_simtracks_m = [i[0] for i in  nlargest(30,max_n_scores,key=itemgetter(2))]
+idx_simtracks_t = [i[1] for i in  nlargest(30,max_n_scores,key=itemgetter(2))]
+sim_top_tracks_m = unique_top_tracks_m.loc[idx_simtracks_m]
+sim_top_tracks_t = unique_top_tracks_t.loc[idx_simtracks_t]
+similar_top_tracks = pd.concat([sim_top_tracks_m,sim_top_tracks_t])
+similar_top_tracks.drop_duplicates(inplace = True)
+similar_top_tracks = similar_top_tracks[~similar_top_tracks["track_id"].isin(last_week_duo["track_id"])]
+similar_top_tracks.reset_index(drop = True,inplace = True)
+new_playlist_df = new_playlist_df.append(similar_top_tracks.sample(10))
 #filter top tracks with common artists for both users
-filtered_top_m = top_tracks_m[top_tracks_m["artist"].isin(common_artists["name"])]
+filtered_top_m = top_tracks_m[top_tracks_m["artist"].isin(common_artists["name"]) 
+                              & ~top_tracks_m["track_id"].isin(last_week_duo["track_id"])]
 filtered_top_m.to_csv(path / "filtered_top_m.csv") #save for checking
-filtered_top_t = top_tracks_t[top_tracks_t["artist"].isin(common_artists["name"])]
+filtered_top_t = top_tracks_t[top_tracks_t["artist"].isin(common_artists["name"])
+                             & ~top_tracks_t["track_id"].isin(last_week_duo["track_id"])]
 filtered_top_t.to_csv(path / "filtered_top_t.csv") #save for checking
 
 #to not have 2+ songs by the same artist we will sample from the above dataframes
@@ -144,7 +164,7 @@ new_playlist_df.reset_index(drop = True, inplace = True)
 new_playlist_df.to_csv(path / "Playlist.csv")
 
 #view tracks and artists to check if everything worked
-print("These are the songs for your new DUO.py playlist")
+print("These are the songs for our new DUO.py playlist")
 print(*zip(new_playlist_df["track_name"],new_playlist_df["artist"]))
 #add tracks to playlist
 confirm = input("Please confirm that you want to replace the current playlist by typing YES   ")
