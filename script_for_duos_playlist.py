@@ -92,10 +92,12 @@ common_songs = dataframe_difference(top_tracks_m,top_tracks_t,which = "both")
 new_playlist_df = common_songs[~common_songs["track_id"].isin(last_week_duo["track_id"])]
 
 #Create a similarity matrix for top songs of both users, delete songs that both dataframes contain first.
+#create dfs of unique songs for each person
 unique_top_tracks_m = top_tracks_m[~top_tracks_m["track_id"].isin(common_songs["track_id"])]
 unique_top_tracks_m.reset_index(drop = True,inplace = True)
 unique_top_tracks_t = top_tracks_t[~top_tracks_t["track_id"].isin(common_songs["track_id"])]
 unique_top_tracks_t.reset_index(drop = True,inplace = True)
+#get 30 most similar songs
 similarity_top_songs = create_similarity_score(unique_top_tracks_m,unique_top_tracks_t)
 max_n_scores = [(i,np.argmax(x),x[np.argmax(x)]) for i,x in enumerate(similarity_top_songs)]
 idx_simtracks_m = [i[0] for i in  nlargest(30,max_n_scores,key=itemgetter(2))]
@@ -106,6 +108,7 @@ similar_top_tracks = pd.concat([sim_top_tracks_m,sim_top_tracks_t])
 similar_top_tracks.drop_duplicates(inplace = True)
 similar_top_tracks = similar_top_tracks[~similar_top_tracks["track_id"].isin(last_week_duo["track_id"])]
 similar_top_tracks.reset_index(drop = True,inplace = True)
+#append 10 sampled songs from most similar songs
 new_playlist_df = new_playlist_df.append(similar_top_tracks.sample(10))
 #filter top tracks with common artists for both users
 filtered_top_m = top_tracks_m[top_tracks_m["artist"].isin(common_artists["name"]) 
@@ -125,7 +128,9 @@ sample_n = (25-len(new_playlist_df))//2
 if sample_n > 7: sample_n = 7
 
 #add samples to new_playlist_df
+if sample_n > len(filtered_top_m): sample_n = len(filtered_top_m)
 new_playlist_df = new_playlist_df.append(filtered_top_m.sample(sample_n,weights = weights_m))
+if sample_n > len(filtered_top_t): sample_n = len(filtered_top_t)
 new_playlist_df = new_playlist_df.append(filtered_top_t.sample(sample_n,weights = weights_t))
 new_playlist_df = new_playlist_df.drop_duplicates().reset_index(drop=True)
 
