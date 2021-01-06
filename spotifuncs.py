@@ -327,6 +327,31 @@ def filter_with_meansong(mean_song,recommendations_df, n_recommendations = 10):
     final_recommendations = recommendations_df.iloc[indices]
     return final_recommendations
 
+
+def feature_filter(df,feature, high = True):
+    """ 
+    Creates a dataframe of final recommendations filtered by a given feature and whether a 
+    high or low value is wanted.
+
+    Parameters
+    ----------
+    df : DataFrame containing songs including their audio features
+    feature : one of the four audio features (speechiness,acousticness,instrumentalness,liveness)
+    high: whether a high value is wanted or a low one (True/False)
+
+    Returns
+    -------
+    df: DataFrame containing all entries that fulfill the filter condition
+    """
+    assert feature in ["speechiness",
+                       "acousticness",
+                       "instrumentalness",
+                       "liveness"], "feature must be one of the following: speechiness,acousticness,instrumentalness,liveness"
+    #more features may be added
+    x = 0.9 if high == True else 0.1
+    df = df[df[feature] > x] if high == True else df[df[feature] < x]
+    return df
+
 ####still a work in progress
 def get_recommendations(df,song_title, similarity_score, num_recommends = 5):
     """ 

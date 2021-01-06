@@ -65,10 +65,14 @@ final_recomms = final_recomms.drop_duplicates()
 final_recomms = final_recomms[~final_recomms["track_name"].isin(playlist_df["track_name"])]
 final_recomms.reset_index(drop = True, inplace = True)
 
-#filter those with mean song
+#filter those with mean song or sample from recommended
 n_recommendations = int(input("how many songs would you like to add to your playlist? Please enter a number between 1 - 20   "))
 assert 21 > n_recommendations > 0 , "Number of Recommendations must be between 1 and 20"
-final_recomms = filter_with_meansong(mean_song,final_recomms, n_recommendations=n_recommendations)
+mean_song_filter = input("Do you wish to filter the songs further by comparing them to the average playlist song? [y/n] (This is works for playlists with a very unified 'sound')")
+if mean_song_filter = "y":
+    final_recomms = filter_with_meansong(mean_song,final_recomms, n_recommendations=n_recommendations)
+else:
+    final_recomms = final_recomms.sample(n = n_recommendations)
 
 # add songs
 confirm = input("Please confirm that you want to add songs to the playlist by typing YES   ")
