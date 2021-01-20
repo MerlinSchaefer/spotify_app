@@ -65,7 +65,7 @@ usernames = [x.strip() for x in usernames]
 username1 = usernames[0]
 username2 = usernames[1]
 #set scope, uri and client_credentials
-scope = "user-library-read user-read-recently-played user-top-read playlist-modify-public playlist-read-private playlist-read-collaborative"
+scope = "user-library-read user-read-recently-played user-top-read playlist-modify-public playlist-read-private playlist-read-collaborative playlist-modify-private"
 
 redirect_uri = "https://developer.spotify.com/dashboard/applications/4a4e029d299a4241873db8300038bf0a"
 
