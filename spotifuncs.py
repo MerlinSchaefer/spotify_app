@@ -220,6 +220,12 @@ def append_audio_features(df,spotify_auth, return_feat_df = False):
     df_features(optional): DataFrame containing just the audio features
     """
     audio_features = spotify_auth.audio_features(df["track_id"][:])
+    #catch and delete songs that have no audio features
+    if None in audio_features:
+        NA_idx=[i for i,v in enumerate(audio_features) if v == None]
+        df.drop(NA_idx,inplace=True)
+        for i in NA_idx:
+            audio_features.pop(i)
     assert len(audio_features) == len(df["track_id"][:])
     feature_cols = list(audio_features[0].keys())[:-7]
     features_list = []
