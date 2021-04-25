@@ -50,6 +50,7 @@ def get_dfs(sp):
 
 #set path
 path = Path("C:/Users/ms101/OneDrive/DataScience_ML/projects/spotify_app")
+#Path("/home/merlin/OneDrive/DataScience_ML/projects/spotify_app")#
 #get client_id and client_secret
 with open(path / "client_s.txt") as f:
     content = f.readlines()
@@ -144,6 +145,7 @@ filtered_saved_t = saved_tracks_t[~saved_tracks_t["artist"].isin(new_playlist_df
 sample_n = (25-len(new_playlist_df))//2
 
 new_playlist_df = pd.concat([new_playlist_df,filtered_saved_m.sample(sample_n),filtered_saved_t.sample(sample_n)])
+new_playlist_df.dropna(inplace = True)
 new_playlist_df.reset_index(drop = True, inplace= True)
 
 #get seed_tracks from new_playlist_df for recommendations 
